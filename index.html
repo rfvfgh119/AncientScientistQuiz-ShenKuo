@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沈括《夢溪筆談》智慧闖關挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .option-btn:hover {
+            transform: scale(1.03);
+        }
+        .option-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div id="quiz-container" class="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-10 transition-all duration-500">
+        
+        <div id="welcome-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">沈括《夢溪筆談》智慧闖關挑戰</h1>
+            <p class="text-center text-gray-600 mb-8">一位古代科學家的好奇心，能揭開多少世界的秘密？跟隨沈括的腳步，一起探索科學的魔法！</p>
+            <button onclick="startQuiz()" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
+                開始挑戰！
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="level-title" class="text-2xl font-bold text-blue-700"></h2>
+                <div id="question-counter" class="text-lg font-semibold text-gray-600"></div>
+            </div>
+            <div id="question-text" class="text-xl md:text-2xl font-semibold text-gray-800 mb-8 min-h-[100px]"></div>
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+            <div class="mt-8 text-center">
+                <button id="next-question-btn" onclick="nextQuestion()" class="hidden bg-gray-800 text-white font-bold py-2 px-8 rounded-lg hover:bg-gray-900 transition-colors">
+                    下一題
+                </button>
+            </div>
+        </div>
+
+        <div id="level-result-screen" class="hidden text-center">
+            <h2 id="level-result-title" class="text-3xl font-bold text-gray-800 mb-4"></h2>
+            <p id="level-result-comment" class="text-2xl font-bold mb-2"></p>
+            <p id="level-result-score" class="text-xl text-gray-600 mb-8"></p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <button id="retry-btn" onclick="retryMissedQuestions()" class="bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-600 transition-transform transform hover:scale-105">
+                    錯題重練
+                </button>
+                <button id="next-level-btn" onclick="startNextLevel()" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+                    繼續挑戰下一關
+                </button>
+            </div>
+        </div>
+
+        <div id="final-result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">恭喜完成所有挑戰！</h2>
+            <div id="final-analysis" class="text-left bg-gray-50 p-6 rounded-lg">
+                <h3 class="text-2xl font-semibold text-blue-700 mb-3">總檢討與學習建議</h3>
+                <p class="mb-2"><strong>總分：</strong><span id="total-score" class="font-bold text-green-600"></span> / 30</p>
+                <div class="mb-4">
+                    <h4 class="font-bold text-lg text-gray-700">學習優勢：</h4>
+                    <p id="learning-strengths" class="text-gray-600"></p>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-bold text-lg text-gray-700">待加強領域：</h4>
+                    <p id="areas-for-improvement" class="text-gray-600"></p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg text-gray-700">個性化學習建議：</h4>
+                    <p id="personalized-advice" class="text-gray-600"></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+const questions = [
+    // --- 第一關：基礎理解 ---
+    {
+        level: 1,
+        [cite_start]question: '《夢溪筆談》的作者，被稱為「好奇寶寶」的北宋科學家是誰？ [cite: 5]',
+        options: ['王安石', '司馬光', '沈括', '蘇軾'],
+        answer: '沈括'
+    },
+    {
+        level: 1,
+        [cite_start]question: '在《正午牡丹》的故事中，那朵神奇的牡丹花會在什麼時候開花？ [cite: 5]',
+        options: ['清晨', '正午', '傍晚', '午夜'],
+        answer: '正午'
+    },
+    {
+        level: 1,
+        [cite_start]question: '在《磁石指南》故事中，沈括發現磁石總是會指向哪個方向？ [cite: 5]',
+        options: ['東方', '西方', '北方', '南方'],
+        answer: '南方'
+    },
+    {
+        level: 1,
+        [cite_start]question: '沈括給在西北方發現的，像黑色糖漿一樣的液體取了什麼名字？ [cite: 6]',
+        options: ['黑水', '石脂水', '地油', '石油'],
+        answer: '石油'
+    },
+    {
+        level: 1,
+        [cite_start]question: '沈括為了研究牡丹花，像偵探一樣記錄了很多數據，下列何者是故事中提到的？ [cite: 5]',
+        options: ['土壤濕度', '花瓣數量', '太陽、溫度、風向', '蜜蜂數量'],
+        answer: '太陽、溫度、風向'
+    },
+    {
+        level: 1,
+        [cite_start]question: '沈括利用磁石磨鐵針，是為了製作什麼工具的雛形？ [cite: 6]',
+        options: ['溫度計', '羅盤', '望遠鏡', '地震儀'],
+        answer: '羅盤'
+    },
+    {
+        level: 1,
+        [cite_start]question: '村民們一開始稱呼「石油」為什麼？ [cite: 6]',
+        options: ['龍的口水', '石脂水', '怪怪的黑水', '地底的眼淚'],
+        answer: '石脂水'
+    },
+    {
+        level: 1,
+        [cite_start]question: '根據故事，沈括生活的北宋是一個什麼樣的時代？ [cite: 5]',
+        options: ['戰爭頻繁的時代', '文學衰敗的時代', '科技發達的時代', '農業落後的時代'],
+        answer: '科技發達的時代'
+    },
+    {
+        level: 1,
+        [cite_start]question: '故事中沒有提到沈括在哪個故事中扮演了「花探員」的角色？ [cite: 5]',
+        options: ['《正午牡丹》', '《磁石指南》', '《石油》', '以上皆非'],
+        answer: '《正午牡丹》'
+    },
+    {
+        level: 1,
+        [cite_start]question: '沈括說的「格物致知」，意思比較接近下列何者？ [cite: 7]',
+        options: ['把東西的價格弄清楚', '透過觀察事物來學習知識', '把物品放在正確的位置', '用禮物來換取知識'],
+        answer: '透過觀察事物來學習知識'
+    },
+    // --- 第二關：深入分析 ---
+    {
+        level: 2,
+        [cite_start]question: '沈括最終發現「正午牡丹」開花的主要原因是什麼？ [cite: 5]',
+        options: ['因為正午的陽光最美', '因為正午的風最大', '因為正午的熱度最高', '因為那是一朵有魔法的花'],
+        answer: '因為正午的熱度最高'
+    },
+    {
+        level: 2,
+        [cite_start]question: '沈括預見到「磁石指南」最重要的實際用途是什麼？ [cite: 6]',
+        options: ['製作好玩的玩具', '幫助水手在海上辨別方向', '用來吸起掉落的鐵釘', '當作鎮紙壓住書本'],
+        answer: '幫助水手在海上辨別方向'
+    },
+    {
+        level: 2,
+        [cite_start]question: '沈括為什麼認為「石油」是「寶貝」？ [cite: 6]',
+        options: ['因為它聞起來很香', '因為它可以當作黑色顏料', '因為他發現這是比柴火更好用的燃料', '因為它非常稀有'],
+        answer: '因為他發現這是比柴火更好用的燃料'
+    },
+    {
+        level: 2,
+        question: '從《正午牡丹》的故事可以看出，沈括的科學方法強調了什麼？',
+        options: ['只憑空想像', '聽信朋友的說法', '進行系統性的觀察與記錄', '只做一次實驗就下結論'],
+        answer: '進行系統性的觀察與記錄'
+    },
+    {
+        level: 2,
+        question: '沈括對待「磁石」和「石油」的共同點是什麼？',
+        options: ['將它們都當成危險物品', '都寫信報告給皇帝', '都透過實驗探究其特性與用途', '都把牠們賣掉賺錢'],
+        answer: '都透過實驗探究其特性與用途'
+    },
+    {
+        level: 2,
+        [cite_start]question: '故事將沈括的科學探索比喻成「玩解謎遊戲」，這說明了科學探索具有什麼特性？ [cite: 5, 7]',
+        options: ['非常危險，隨時會失敗', '需要尋找線索，破解秘密，充滿樂趣', '過程枯燥乏味，讓人想睡覺', '只有天才才能玩'],
+        answer: '需要尋找線索，破解秘密，充滿樂趣'
+    },
+    {
+        level: 2,
+        [cite_start]question: '沈括預言「石油」未來會是「大資源」，這體現了他什麼樣的能力？ [cite: 6]',
+        options: ['魔法預言的能力', '基於觀察的遠見卓識', '誇大其詞的能力', '賺錢經商的能力'],
+        answer: '基於觀察的遠見卓識'
+    },
+    {
+        level: 2,
+        [cite_start]question: '村民對「石油」的反應是「哇哇叫」，而沈括是「這是寶貝！」，這兩者反應的差別在哪裡？ [cite: 6]',
+        options: ['膽量大小的差別', '一個害怕未知，一個探索未知', '貧富的差別', '年齡的差別'],
+        answer: '一個害怕未知，一個探索未知'
+    },
+    {
+        level: 2,
+        question: '沈括將鐵針用磁石磨過後也變成了小磁鐵，這個過程我們現在稱之為什麼？',
+        options: ['融化', '磁化', '液化', '純化'],
+        answer: '磁化'
+    },
+    {
+        level: 2,
+        [cite_start]question: '根據故事，沈括認為獲得知識的「超級武器」或「超級力量」是什麼？ [cite: 7]',
+        options: ['財富和權力', '記憶力和背誦能力', '觀察力和好奇心', '體力和武力'],
+        answer: '觀察力和好奇心'
+    },
+    // --- 第三關：深層理解與應用 ---
+    {
+        level: 3,
+        [cite_start]question: '沈括的「格物致知」精神，與現代哪一種思維方式最為接近？ [cite: 7]',
+        options: ['藝術創作思維', '神話幻想思維', '科學實證思維', '哲學冥想思維'],
+        answer: '科學實證思維'
+    },
+    {
+        level: 3,
+        question: '從沈括的三個故事中，我們可以學到科學研究的第一步通常是什麼？',
+        options: ['提出一個複雜的數學公式', '對身邊的奇特現象保持好奇並仔細觀察', '直接閱讀書本尋找答案', '花大錢購買昂貴的實驗器材'],
+        answer: '對身邊的奇特現象保持好奇並仔細觀察'
+    },
+    {
+        level: 3,
+        question: '如果你想用沈括的方法研究「為什麼冰塊會融化」，你會怎麼做？',
+        options: ['問爸爸媽媽', '直接認定是魔法', '觀察並記錄冰塊在不同溫度、光照下的融化速度', '把冰塊丟掉，換一個不會融化的'],
+        answer: '觀察並記錄冰塊在不同溫度、光照下的融化速度'
+    },
+    {
+        level: 3,
+        question: '沈括對石油的命名與預測，在今天看來有何重要意義？',
+        options: ['沒有意義，因為現在有電了', '意義重大，石油至今仍是全球重要能源', '他只是隨便說說', '他應該申請專利'],
+        answer: '意義重大，石油至今仍是全球重要能源'
+    },
+    {
+        level: 3,
+        question: '《夢溪筆談》這本書的價值，不僅在於記錄了科學「知識」，更在於記錄了什麼？',
+        options: ['北宋的宮廷秘聞', '沈括的個人財產清單', '科學家探究問題的「過程」與「方法」', '當時的流行歌曲歌詞'],
+        answer: '科學家探究問題的「過程」與「方法」'
+    },
+    {
+        level: 3,
+        question: '沈括的科學精神，對於我們玩手機或電腦遊戲有什麼啟發？',
+        options: ['要一直玩到半夜', '要花錢買最好的裝備', '可以觀察遊戲規則，找出最高效的策略', '遊戲都是虛假的，不值得研究'],
+        answer: '可以觀察遊戲規則，找出最高效的策略'
+    },
+    {
+        level: 3,
+        question: '相較於「正午牡丹只在中午開」這種單純的描述，沈括的研究更進一步的地方在哪裡？',
+        options: ['他給牡丹花取了更好聽的名字', '他找到了現象背後的「因果關係」', '他把花移植到了自己的家裡', '他畫了一幅很漂亮的牡丹圖'],
+        answer: '他找到了現象背後的「因果關係」'
+    },
+    {
+        level: 3,
+        [cite_start]question: '故事中說「好奇心是超級力量」，這句話如何體現在沈括身上？ [cite: 7]',
+        options: ['他的力氣比所有人都大', '好奇心驅使他去探索別人習以為常或感到害怕的事物', '他能和動植物溝通', '他對所有事情都不滿意'],
+        answer: '好奇心驅使他去探索別人習以為常或感到害怕的事物'
+    },
+    {
+        level: 3,
+        question: '沈括對磁偏角的記載（雖然故事中未詳細說明，但為其重要貢獻），對導航技術有何深遠影響？',
+        options: ['讓船隻航行更不準確', '是實現精準導航必須考慮的關鍵因素', '讓羅盤完全失去作用', '沒有任何影響'],
+        answer: '是實現精準導航必須考慮的關鍵因素'
+    },
+    {
+        level: 3,
+        [cite_start]question: '綜合整個故事，沈括留給後人最寶貴的「寶藏」是什麼？ [cite: 8]',
+        options: ['他發現的石油和磁石', '他當官的權力', '他寫的詩集', '他那種凡事探究、實事求是的科學精神'],
+        answer: '他那種凡事探究、實事求是的科學精神'
+    }
+];
+
+let currentLevel = 1;
+let currentQuestionIndex = 0;
+let levelScore = 0;
+let totalScore = 0;
+let levelQuestions = [];
+let missedQuestionsInLevel = [];
+let isRetryMode = false;
+
+const welcomeScreen = document.getElementById('welcome-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const levelResultScreen = document.getElementById('level-result-screen');
+const finalResultScreen = document.getElementById('final-result-screen');
+
+const levelTitle = document.getElementById('level-title');
+const questionCounter = document.getElementById('question-counter');
+const questionText = document.getElementById('question-text');
+const optionsContainer = document.getElementById('options-container');
+const nextQuestionBtn = document.getElementById('next-question-btn');
+
+function startQuiz() {
+    welcomeScreen.classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+    loadLevel(1);
+}
+
+function loadLevel(level) {
+    currentLevel = level;
+    levelQuestions = questions.filter(q => q.level === level);
+    currentQuestionIndex = 0;
+    levelScore = 0;
+    missedQuestionsInLevel = [];
+    isRetryMode = false;
+    
+    levelTitle.textContent = `第 ${currentLevel} 關：${getLevelName(currentLevel)}`;
+    displayQuestion();
+}
+
+function getLevelName(level) {
+    if (level === 1) return '基礎發現';
+    if (level === 2) return '深入探究';
+    if (level === 3) return '科學應用';
+    return '錯題重練';
+}
+
+function displayQuestion() {
+    nextQuestionBtn.classList.add('hidden');
+    const question = levelQuestions[currentQuestionIndex];
+    questionText.innerHTML = question.question;
+    questionCounter.textContent = `第 ${currentQuestionIndex + 1} / ${levelQuestions.length} 題`;
+    optionsContainer.innerHTML = '';
+
+    question.options.forEach(option => {
+        const button = document.createElement('button');
+        button.innerHTML = option;
+        button.classList.add('option-btn', 'w-full', 'p-4', 'border-2', 'rounded-lg', 'text-left', 'transition-all', 'duration-300', 'bg-gray-50', 'border-gray-300', 'hover:bg-blue-100', 'hover:border-blue-400');
+        button.onclick = () => selectAnswer(button, option, question.answer);
+        optionsContainer.appendChild(button);
+    });
+}
+
+function selectAnswer(button, selectedOption, correctAnswer) {
+    const buttons = optionsContainer.querySelectorAll('button');
+    let correct = false;
+
+    if (selectedOption === correctAnswer) {
+        levelScore++;
+        correct = true;
+    } else {
+        missedQuestionsInLevel.push(levelQuestions[currentQuestionIndex]);
+    }
+
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerHTML === correctAnswer) {
+            btn.classList.add('correct');
+        } else if (btn === button && !correct) {
+            btn.classList.add('incorrect');
+        }
+    });
+
+    nextQuestionBtn.classList.remove('hidden');
+}
+
+function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < levelQuestions.length) {
+        displayQuestion();
+    } else {
+        showLevelResult();
+    }
+}
+
+function showLevelResult() {
+    quizScreen.classList.add('hidden');
+    levelResultScreen.classList.remove('hidden');
+
+    const score = levelScore;
+    const total = levelQuestions.length;
+    const percentage = (score / total) * 100;
+    
+    document.getElementById('level-result-title').textContent = isRetryMode ? '重練結果' : `第 ${currentLevel} 關完成！`;
+    document.getElementById('level-result-score').textContent = `本關得分：${score} / ${total}`;
+
+    const commentEl = document.getElementById('level-result-comment');
+    if (percentage === 100) {
+        commentEl.textContent = '太棒了！您有沈括的科學家之眼！';
+        commentEl.className = 'text-2xl font-bold mb-2 text-green-500';
+    } else if (percentage >= 70) {
+        commentEl.textContent = '很不錯！觀察力敏銳！';
+        commentEl.className = 'text-2xl font-bold mb-2 text-blue-500';
+    } else {
+        commentEl.textContent = '再努力！像沈括一樣多問為什麼！';
+        commentEl.className = 'text-2xl font-bold mb-2 text-yellow-500';
+    }
+
+    if (!isRetryMode) {
+        totalScore += score;
+    }
+    
+    const retryBtn = document.getElementById('retry-btn');
+    if (missedQuestionsInLevel.length > 0 && !isRetryMode) {
+        retryBtn.classList.remove('hidden');
+    } else {
+        retryBtn.classList.add('hidden');
+    }
+
+    const nextLevelBtn = document.getElementById('next-level-btn');
+    if (currentLevel < 3) {
+        nextLevelBtn.textContent = '繼續挑戰下一關';
+        nextLevelBtn.classList.remove('hidden');
+    } else {
+        nextLevelBtn.textContent = '查看總結報告';
+        nextLevelBtn.classList.remove('hidden');
+    }
+}
+
+function retryMissedQuestions() {
+    levelResultScreen.classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+
+    totalScore -= missedQuestionsInLevel.length;
+    levelQuestions = [...missedQuestionsInLevel];
+    currentQuestionIndex = 0;
+    levelScore = 0; 
+    missedQuestionsInLevel = [];
+    isRetryMode = true;
+
+    levelTitle.textContent = '錯題重練';
+    displayQuestion();
+}
+
+function startNextLevel() {
+    levelResultScreen.classList.add('hidden');
+    if (isRetryMode) {
+        totalScore += levelScore;
+    }
+    
+    if (currentLevel < 3) {
+        loadLevel(currentLevel + 1);
+        quizScreen.classList.remove('hidden');
+    } else {
+        showFinalAnalysis();
+    }
+}
+
+function showFinalAnalysis() {
+    finalResultScreen.classList.remove('hidden');
+    document.getElementById('total-score').textContent = totalScore;
+    
+    const performance = totalScore / 30;
+    let strengths = '';
+    let weaknesses = '';
+    let advice = '';
+
+    if (performance >= 0.9) {
+        strengths = '您對沈括的科學發現、研究方法及其背後的科學精神都有卓越的理解！您是一位天生的「科學小偵探」。';
+        weaknesses = '表現近乎完美，無可挑剔！';
+        advice = '恭喜您，您已深刻領會沈括「格物致知」的精神！建議您可以試著在生活中尋找一個感興趣的「為什麼」，並用沈括的方法去觀察、記錄、尋找答案。';
+    } else if (performance >= 0.7) {
+        strengths = '您對故事中的科學發現掌握良好，並能理解沈括的研究過程與其重要性。';
+        weaknesses = '在將沈括的科學精神應用於現代生活，或理解其深遠影響的題目上，可能還有提升空間。';
+        advice = '表現非常出色！建議多思考這三個故事背後的共通點：好奇心、觀察和實驗。這正是所有科學研究的基礎，也是您未來學習的超級力量！';
+    } else if (performance >= 0.5) {
+        strengths = '您對《夢溪筆談》中的三個故事有不錯的記憶，了解基本的發現內容。';
+        weaknesses = '對於現象背後的原因、科學方法的應用，以及沈括科學精神的核心意義，需要進一步加強。';
+        advice = '您有很好的潛力！建議重新回顧故事，特別注意沈括是如何從「看到」一個現象，進階到「探究」其原因的。試著區分「村民的反應」和「沈括的反應」，就能抓住科學精神的關鍵。';
+    } else {
+        strengths = '您勇敢地完成了所有挑戰，這就是科學探索的第一步！';
+        weaknesses = '對故事的細節、科學原理和核心精神的掌握度較低，可能需要更仔細地理解故事內容。';
+        advice = '別氣餒，每個偉大的科學家都是從問「為什麼」開始的。強烈建議您重新聽一次故事，這次的任務是找出沈括問了哪些問題，又是如何找到答案的。加油，下一次您會發現更多！';
+    }
+
+    document.getElementById('learning-strengths').textContent = strengths;
+    document.getElementById('areas-for-improvement').textContent = weaknesses;
+    document.getElementById('personalized-advice').textContent = advice;
+}
+
+</script>
+</body>
+</html>
